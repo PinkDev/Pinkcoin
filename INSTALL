@@ -1,0 +1,9 @@
+Building pinkcoin
+
+See doc/readme-qt.rst for instructions on building pinkcoin QT,
+the intended-for-end-users, nice-graphical-interface, reference
+implementation of pinkcoin.
+
+See doc/build-*.txt for instructions on building pinkcoind,
+the intended-for-services, no-graphical-interface, reference
+implementation of pinkcoin.
