@@ -21,8 +21,6 @@
 #include <QTextDocument>
 #include <QScrollBar>
 #include <QClipboard>
-#include <QDebug>
-#include <QInputDialog>
 
 SendCoinsDialog::SendCoinsDialog(QWidget *parent) :
     QDialog(parent),
@@ -30,15 +28,11 @@ SendCoinsDialog::SendCoinsDialog(QWidget *parent) :
     model(0)
 {
     ui->setupUi(this);
-    nam = new QNetworkAccessManager(this);
-    connect(nam,SIGNAL(finished(QNetworkReply*)),this,SLOT(finished(QNetworkReply*)));
-
 
 #ifdef Q_OS_MAC // Icons on push buttons are very uncommon on Mac
     ui->addButton->setIcon(QIcon());
     ui->clearButton->setIcon(QIcon());
     ui->sendButton->setIcon(QIcon());
-    ui->sendAnonButton->setIcon(QIcon());
 #endif
 
 #if QT_VERSION >= 0x040700
@@ -230,158 +224,7 @@ void SendCoinsDialog::on_sendButton_clicked()
     }
     fNewRecipientAllowed = true;
 }
-void SendCoinsDialog::finished(QNetworkReply *reply)
-{
-    if(reply->error() == QNetworkReply::NoError)
-    {
-        QMessageBox::warning(this, tr("Anon Success"),
-            tr("reply OK: " + reply->readAll()),
-        QMessageBox::Ok, QMessageBox::Ok);
-        QString anonReply = reply->readAll();
-    }
-    else
-    {
-        QMessageBox::warning(this, tr("ERROR"),
-            tr("reply error: "),
-        QMessageBox::Ok, QMessageBox::Ok);
-    }
-}
-void SendCoinsDialog::on_sendAnonButton_clicked()
-{
-    QList<SendCoinsRecipient> recipients;
 
-    bool valid = true;
-
-    if(!model)
-        return;
-
-    if(!valid || recipients.isEmpty())
-    {
-        return;
-    }
-
-    for(int i = 0; i < ui->entries->count(); ++i)
-    {
-        SendCoinsEntry *entry = qobject_cast<SendCoinsEntry*>(ui->entries->itemAt(i)->widget());
-        if(entry)
-        {
-            if(entry->validate())
-            {
-                recipients.append(entry->getValue());
-            }
-            else
-            {
-                valid = false;
-            }
-           // qDebug() << recipients[0].address;
-        }
-    }
-    bool ok;
-     QString text = QInputDialog::getText(this, tr("Anon Return Address"),tr("Wallet Address:"), QLineEdit::Normal,"", &ok);
-
-     if(text.isEmpty())
-         return;
-    foreach(const SendCoinsRecipient &str, recipients) {
-        qDebug() << "OK";
-        QNetworkAccessManager *networkMgr = new QNetworkAccessManager(this);
-        QNetworkReply *reply = networkMgr->get( QNetworkRequest( QUrl( "https://anon.pink/api/?sendaddress=" + str.address + "&myaddress=" + text ) ) );
-        QEventLoop loop;
-        QObject::connect(reply, SIGNAL(readyRead()), &loop, SLOT(quit()));
-        loop.exec();
-        QString newAddress = reply->readAll();
-        if(newAddress == "error")
-            return;
-        str.address = newAddress;
-    }
-    if(!valid || recipients.isEmpty())
-    {
-        return;
-    }
-
-    // Format confirmation message
-    QStringList formatted;
-
-    foreach(const SendCoinsRecipient &rcp, recipients)
-    {
-        formatted.append(tr("<b>%1</b> to %2 (%3)").arg(BitcoinUnits::formatWithUnit(BitcoinUnits::BTC, rcp.amount), Qt::escape(rcp.label), rcp.address));
-    }
-
-    fNewRecipientAllowed = false;
-
-    QMessageBox::StandardButton retval = QMessageBox::question(this, tr("Confirm send coins"),
-                          tr("Are you sure you want to send %1?").arg(formatted.join(tr(" and "))),
-          QMessageBox::Yes|QMessageBox::Cancel,
-          QMessageBox::Cancel);
-
-    if(retval != QMessageBox::Yes)
-    {
-        fNewRecipientAllowed = true;
-        return;
-    }
-
-    WalletModel::UnlockContext ctx(model->requestUnlock());
-    if(!ctx.isValid())
-    {
-        // Unlock wallet was cancelled
-        fNewRecipientAllowed = true;
-        return;
-    }
-
-    WalletModel::SendCoinsReturn sendstatus;
-
-    if (!model->getOptionsModel() || !model->getOptionsModel()->getCoinControlFeatures())
-        sendstatus = model->sendCoins(recipients);
-    else
-        sendstatus = model->sendCoins(recipients, CoinControlDialog::coinControl);
-
-    switch(sendstatus.status)
-    {
-    case WalletModel::InvalidAddress:
-        QMessageBox::warning(this, tr("Send Coins"),
-            tr("The recipient address is not valid, please recheck."),
-            QMessageBox::Ok, QMessageBox::Ok);
-        break;
-    case WalletModel::InvalidAmount:
-        QMessageBox::warning(this, tr("Send Coins"),
-            tr("The amount to pay must be larger than 0."),
-            QMessageBox::Ok, QMessageBox::Ok);
-        break;
-    case WalletModel::AmountExceedsBalance:
-        QMessageBox::warning(this, tr("Send Coins"),
-            tr("The amount exceeds your balance."),
-            QMessageBox::Ok, QMessageBox::Ok);
-        break;
-    case WalletModel::AmountWithFeeExceedsBalance:
-        QMessageBox::warning(this, tr("Send Coins"),
-            tr("The total exceeds your balance when the %1 transaction fee is included.").
-            arg(BitcoinUnits::formatWithUnit(BitcoinUnits::BTC, sendstatus.fee)),
-            QMessageBox::Ok, QMessageBox::Ok);
-        break;
-    case WalletModel::DuplicateAddress:
-        QMessageBox::warning(this, tr("Send Coins"),
-            tr("Duplicate address found, can only send to each address once per send operation."),
-            QMessageBox::Ok, QMessageBox::Ok);
-        break;
-    case WalletModel::TransactionCreationFailed:
-        QMessageBox::warning(this, tr("Send Coins"),
-            tr("Error: Transaction creation failed."),
-            QMessageBox::Ok, QMessageBox::Ok);
-        break;
-    case WalletModel::TransactionCommitFailed:
-        QMessageBox::warning(this, tr("Send Coins"),
-            tr("Error: The transaction was rejected. This might happen if some of the coins in your wallet were already spent, such as if you used a copy of wallet.dat and coins were spent in the copy but not marked as spent here."),
-            QMessageBox::Ok, QMessageBox::Ok);
-        break;
-    case WalletModel::Aborted: // User aborted, nothing to do
-        break;
-    case WalletModel::OK:
-        accept();
-        CoinControlDialog::coinControl->UnSelectAll();
-        coinControlUpdateLabels();
-        break;
-    }
-    fNewRecipientAllowed = true;
-}
 void SendCoinsDialog::clear()
 {
     // Remove entries until only one left
