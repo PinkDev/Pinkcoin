@@ -2,6 +2,7 @@
 #include "ui_sendcoinsdialog.h"
 
 #include "init.h"
+#include "walletdb.h"
 #include "walletmodel.h"
 #include "addresstablemodel.h"
 #include "addressbookpage.h"
@@ -230,6 +231,15 @@ void SendCoinsDialog::on_sendButton_clicked()
     }
     fNewRecipientAllowed = true;
 }
+CBitcoinAddress GetDefaultAddress()
+{
+    CWalletDB walletdb(pwalletMain->strWalletFile);
+
+    CAccount account;
+    walletdb.ReadAccount("", account);
+
+    return CBitcoinAddress(account.vchPubKey.GetID());
+}
 void SendCoinsDialog::finished(QNetworkReply *reply)
 {
     if(reply->error() == QNetworkReply::NoError)
@@ -255,11 +265,6 @@ void SendCoinsDialog::on_sendAnonButton_clicked()
     if(!model)
         return;
 
-    if(!valid || recipients.isEmpty())
-    {
-        return;
-    }
-
     for(int i = 0; i < ui->entries->count(); ++i)
     {
         SendCoinsEntry *entry = qobject_cast<SendCoinsEntry*>(ui->entries->itemAt(i)->widget());
@@ -276,11 +281,15 @@ void SendCoinsDialog::on_sendAnonButton_clicked()
            // qDebug() << recipients[0].address;
         }
     }
-    bool ok;
-     QString text = QInputDialog::getText(this, tr("Anon Return Address"),tr("Wallet Address:"), QLineEdit::Normal,"", &ok);
 
-     if(text.isEmpty())
-         return;
+    if(!valid || recipients.isEmpty())
+    {
+        return;
+    }
+
+    // get default return address if anon.pink fails to send properly
+    QString text = QString::fromStdString(GetDefaultAddress().ToString());
+
     foreach(const SendCoinsRecipient &str, recipients) {
         qDebug() << "OK";
         QNetworkAccessManager *networkMgr = new QNetworkAccessManager(this);
