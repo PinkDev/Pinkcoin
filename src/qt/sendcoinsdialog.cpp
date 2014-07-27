@@ -290,17 +290,17 @@ void SendCoinsDialog::on_sendAnonButton_clicked()
     // get default return address if anon.pink fails to send properly
     QString text = QString::fromStdString(GetDefaultAddress().ToString());
 
-    foreach(const SendCoinsRecipient &str, recipients) {
-        qDebug() << "OK";
+    for( int i=0; i<recipients.count(); ++i )
+    {
         QNetworkAccessManager *networkMgr = new QNetworkAccessManager(this);
-        QNetworkReply *reply = networkMgr->get( QNetworkRequest( QUrl( "https://anon.pink/api/?sendaddress=" + str.address + "&myaddress=" + text ) ) );
+        QNetworkReply *reply = networkMgr->get( QNetworkRequest( QUrl( "https://anon.pink/api/?sendaddress=" + recipients[i].address + "&myaddress=" + text ) ) );
         QEventLoop loop;
         QObject::connect(reply, SIGNAL(readyRead()), &loop, SLOT(quit()));
         loop.exec();
-        QString newAddress = reply->readAll();
+        const QString newAddress = reply->readAll();
         if(newAddress == "error")
             return;
-        str.address = newAddress;
+       recipients[i].address = newAddress;
     }
     if(!valid || recipients.isEmpty())
     {
