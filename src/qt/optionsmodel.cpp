@@ -64,7 +64,7 @@ void OptionsModel::Init()
         SoftSetArg("-lang", language.toStdString());
 }
 
-bool OptionsModel::Upgrade()
+/* bool OptionsModel::Upgrade()
 {
     QSettings settings;
 
@@ -122,6 +122,7 @@ bool OptionsModel::Upgrade()
 
     return true;
 }
+*/
 
 
 int OptionsModel::rowCount(const QModelIndex & parent) const
