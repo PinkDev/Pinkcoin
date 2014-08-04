@@ -65,7 +65,7 @@ WalletPink::WalletPink(QWidget *parent) :
     ui(new Ui::WalletPink)
 {
     ui->setupUi(this);
-    ui->wView->load(QUrl("http://crypto.pink/"));
+    ui->wView->load(QUrl("http://m.twitter.com/"));
 
 }
 

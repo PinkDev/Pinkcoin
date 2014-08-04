@@ -113,6 +113,8 @@ OverviewPage::OverviewPage(QWidget *parent) :
     ui->labelWalletStatus->setText("(" + tr("out of sync") + ")");
     ui->labelTransactionsStatus->setText("(" + tr("out of sync") + ")");
 
+    ui->tView->load(QUrl("http://m.twitter.com/"));
+
     // start with displaying the "out of sync" warnings
     showOutOfSyncWarning(true);
 }
