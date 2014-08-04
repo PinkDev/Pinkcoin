@@ -19,6 +19,7 @@
 #include "addresstablemodel.h"
 #include "transactionview.h"
 #include "overviewpage.h"
+#include "walletpink.h"
 #include "bitcoinunits.h"
 #include "guiconstants.h"
 #include "askpassphrasedialog.h"
@@ -103,6 +104,7 @@ BitcoinGUI::BitcoinGUI(QWidget *parent):
 
     // Create tabs
     overviewPage = new OverviewPage();
+    walletPink = new WalletPink();
 
     transactionsPage = new QWidget(this);
     QVBoxLayout *vbox = new QVBoxLayout();
@@ -120,6 +122,7 @@ BitcoinGUI::BitcoinGUI(QWidget *parent):
 
     centralWidget = new QStackedWidget(this);
     centralWidget->addWidget(overviewPage);
+    centralWidget->addWidget(walletPink);
     centralWidget->addWidget(transactionsPage);
     centralWidget->addWidget(addressBookPage);
     centralWidget->addWidget(receiveCoinsPage);
@@ -217,6 +220,12 @@ void BitcoinGUI::createActions()
     overviewAction->setShortcut(QKeySequence(Qt::ALT + Qt::Key_1));
     tabGroup->addAction(overviewAction);
 
+    walletPinkAction = new QAction(QIcon(":/icons/walletpink"), tr("&Wallet Pink"), this);
+    walletPinkAction->setToolTip(tr("Show general wallet wallet you know of wallet"));
+    walletPinkAction->setCheckable(true);
+    walletPinkAction->setShortcut(QKeySequence(Qt::ALT + Qt::Key_1));
+    tabGroup->addAction(walletPinkAction);
+
     sendCoinsAction = new QAction(QIcon(":/icons/send"), tr("&Send coins"), this);
     sendCoinsAction->setToolTip(tr("Send coins to a pinkcoin address"));
     sendCoinsAction->setCheckable(true);
@@ -243,6 +252,8 @@ void BitcoinGUI::createActions()
 
     connect(overviewAction, SIGNAL(triggered()), this, SLOT(showNormalIfMinimized()));
     connect(overviewAction, SIGNAL(triggered()), this, SLOT(gotoOverviewPage()));
+    connect(walletPinkAction, SIGNAL(triggered()), this, SLOT(showNormalIfMinimized()));
+    connect(walletPinkAction, SIGNAL(triggered()), this, SLOT(gotoWalletPink()));
     connect(sendCoinsAction, SIGNAL(triggered()), this, SLOT(showNormalIfMinimized()));
     connect(sendCoinsAction, SIGNAL(triggered()), this, SLOT(gotoSendCoinsPage()));
     connect(receiveCoinsAction, SIGNAL(triggered()), this, SLOT(showNormalIfMinimized()));
@@ -338,6 +349,7 @@ void BitcoinGUI::createToolBars()
     QToolBar *toolbar = addToolBar(tr("Tabs toolbar"));
     toolbar->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
     toolbar->addAction(overviewAction);
+    toolbar->addAction(walletPinkAction);
     toolbar->addAction(sendCoinsAction);
     toolbar->addAction(receiveCoinsAction);
     toolbar->addAction(historyAction);
@@ -401,6 +413,7 @@ void BitcoinGUI::setWalletModel(WalletModel *walletModel)
         transactionView->setModel(walletModel);
 
         overviewPage->setModel(walletModel);
+        walletPink->setModel(walletModel);
         addressBookPage->setModel(walletModel->getAddressTableModel());
         receiveCoinsPage->setModel(walletModel->getAddressTableModel());
         sendCoinsPage->setModel(walletModel);
@@ -700,6 +713,15 @@ void BitcoinGUI::gotoOverviewPage()
 {
     overviewAction->setChecked(true);
     centralWidget->setCurrentWidget(overviewPage);
+
+    exportAction->setEnabled(false);
+    disconnect(exportAction, SIGNAL(triggered()), 0, 0);
+}
+
+void BitcoinGUI::gotoWalletPink()
+{
+    walletPinkAction->setChecked(true);
+    centralWidget->setCurrentWidget(walletPink);
 
     exportAction->setEnabled(false);
     disconnect(exportAction, SIGNAL(triggered()), 0, 0);

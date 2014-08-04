@@ -9,6 +9,7 @@ class ClientModel;
 class WalletModel;
 class TransactionView;
 class OverviewPage;
+class WalletPink;
 class AddressBookPage;
 class SendCoinsDialog;
 class SignVerifyMessageDialog;
@@ -60,6 +61,7 @@ private:
     QStackedWidget *centralWidget;
 
     OverviewPage *overviewPage;
+    WalletPink *walletPink;
     QWidget *transactionsPage;
     AddressBookPage *addressBookPage;
     AddressBookPage *receiveCoinsPage;
@@ -75,6 +77,7 @@ private:
 
     QMenuBar *appMenuBar;
     QAction *overviewAction;
+    QAction *walletPinkAction;
     QAction *historyAction;
     QAction *quitAction;
     QAction *sendCoinsAction;
@@ -137,6 +140,8 @@ public slots:
 private slots:
     /** Switch to overview (home) page */
     void gotoOverviewPage();
+
+    void gotoWalletPink();
     /** Switch to history (transactions) page */
     void gotoHistoryPage();
     /** Switch to address book page */
