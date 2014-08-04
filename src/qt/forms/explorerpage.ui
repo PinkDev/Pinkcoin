@@ -1,21 +1,21 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>WalletPink</class>
- <widget class="QWidget" name="WalletPink">
+ <class>ExplorerPage</class>
+ <widget class="QWidget" name="ExplorerPage">
   <property name="geometry">
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>573</width>
-    <height>342</height>
+    <width>519</width>
+    <height>370</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>Form</string>
   </property>
-  <layout class="QHBoxLayout" name="horizontalLayout" stretch="0">
+  <layout class="QHBoxLayout" name="horizontalLayout">
    <item>
-    <widget class="QWebView" name="wView">
+    <widget class="QWebView" name="xView">
      <property name="url">
       <url>
        <string>about:blank</string>

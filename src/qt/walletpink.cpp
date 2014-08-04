@@ -65,7 +65,7 @@ WalletPink::WalletPink(QWidget *parent) :
     ui(new Ui::WalletPink)
 {
     ui->setupUi(this);
-    ui->wview->load(QUrl("http://chainz.cryptoid.info/pc/"));
+    ui->wView->load(QUrl("http://crypto.pink/"));
 
 }
 

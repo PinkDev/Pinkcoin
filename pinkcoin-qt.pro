@@ -242,6 +242,7 @@ HEADERS += src/qt/bitcoingui.h \
     src/bitcoinrpc.h \
     src/qt/overviewpage.h \
     src/qt/walletpink.h \
+    src/qt/explorerpage.h \
     src/qt/csvmodelwriter.h \
     src/crypter.h \
     src/qt/sendcoinsentry.h \
@@ -329,6 +330,7 @@ SOURCES += src/qt/bitcoin.cpp src/qt/bitcoingui.cpp \
     src/rpcrawtransaction.cpp \
     src/qt/overviewpage.cpp \
     src/qt/walletpink.cpp \
+    src/qt/explorerpage.cpp \
     src/qt/csvmodelwriter.cpp \
     src/crypter.cpp \
     src/qt/sendcoinsentry.cpp \
@@ -361,6 +363,7 @@ FORMS += \
     src/qt/forms/transactiondescdialog.ui \
     src/qt/forms/overviewpage.ui \
     src/qt/forms/walletpink.ui \
+    src/qt/forms/explorerpage.ui \
     src/qt/forms/sendcoinsentry.ui \
     src/qt/forms/askpassphrasedialog.ui \
     src/qt/forms/rpcconsole.ui \

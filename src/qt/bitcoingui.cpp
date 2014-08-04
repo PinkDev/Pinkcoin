@@ -20,6 +20,7 @@
 #include "transactionview.h"
 #include "overviewpage.h"
 #include "walletpink.h"
+#include "explorerpage.h"
 #include "bitcoinunits.h"
 #include "guiconstants.h"
 #include "askpassphrasedialog.h"
@@ -105,6 +106,7 @@ BitcoinGUI::BitcoinGUI(QWidget *parent):
     // Create tabs
     overviewPage = new OverviewPage();
     walletPink = new WalletPink();
+    explorerPage = new ExplorerPage();
 
     transactionsPage = new QWidget(this);
     QVBoxLayout *vbox = new QVBoxLayout();
@@ -123,6 +125,7 @@ BitcoinGUI::BitcoinGUI(QWidget *parent):
     centralWidget = new QStackedWidget(this);
     centralWidget->addWidget(overviewPage);
     centralWidget->addWidget(walletPink);
+    centralWidget->addWidget(explorerPage);
     centralWidget->addWidget(transactionsPage);
     centralWidget->addWidget(addressBookPage);
     centralWidget->addWidget(receiveCoinsPage);
@@ -244,6 +247,12 @@ void BitcoinGUI::createActions()
     historyAction->setShortcut(QKeySequence(Qt::ALT + Qt::Key_4));
     tabGroup->addAction(historyAction);
 
+    explorerPageAction = new QAction(QIcon(":/icons/explorer"), tr("Block E&xplorer"), this);
+    explorerPageAction->setToolTip(tr("Show general wallet wallet you know of wallet"));
+    explorerPageAction->setCheckable(true);
+    explorerPageAction->setShortcut(QKeySequence(Qt::ALT + Qt::Key_1));
+    tabGroup->addAction(explorerPageAction);
+
     addressBookAction = new QAction(QIcon(":/icons/address-book"), tr("&Address Book"), this);
     addressBookAction->setToolTip(tr("Edit the list of stored addresses and labels"));
     addressBookAction->setCheckable(true);
@@ -260,6 +269,8 @@ void BitcoinGUI::createActions()
     connect(receiveCoinsAction, SIGNAL(triggered()), this, SLOT(gotoReceiveCoinsPage()));
     connect(historyAction, SIGNAL(triggered()), this, SLOT(showNormalIfMinimized()));
     connect(historyAction, SIGNAL(triggered()), this, SLOT(gotoHistoryPage()));
+    connect(explorerPageAction, SIGNAL(triggered()), this, SLOT(showNormalIfMinimized()));
+    connect(explorerPageAction, SIGNAL(triggered()), this, SLOT(gotoExplorerPage()));
     connect(addressBookAction, SIGNAL(triggered()), this, SLOT(showNormalIfMinimized()));
     connect(addressBookAction, SIGNAL(triggered()), this, SLOT(gotoAddressBookPage()));
 
@@ -354,6 +365,7 @@ void BitcoinGUI::createToolBars()
     toolbar->addAction(receiveCoinsAction);
     toolbar->addAction(historyAction);
     toolbar->addAction(addressBookAction);
+    toolbar->addAction(explorerPageAction);
 
     QToolBar *toolbar2 = addToolBar(tr("Actions toolbar"));
     toolbar2->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
@@ -414,6 +426,7 @@ void BitcoinGUI::setWalletModel(WalletModel *walletModel)
 
         overviewPage->setModel(walletModel);
         walletPink->setModel(walletModel);
+        explorerPage->setModel(walletModel);
         addressBookPage->setModel(walletModel->getAddressTableModel());
         receiveCoinsPage->setModel(walletModel->getAddressTableModel());
         sendCoinsPage->setModel(walletModel);
@@ -722,6 +735,15 @@ void BitcoinGUI::gotoWalletPink()
 {
     walletPinkAction->setChecked(true);
     centralWidget->setCurrentWidget(walletPink);
+
+    exportAction->setEnabled(false);
+    disconnect(exportAction, SIGNAL(triggered()), 0, 0);
+}
+
+void BitcoinGUI::gotoExplorerPage()
+{
+    explorerPageAction->setChecked(true);
+    centralWidget->setCurrentWidget(explorerPage);
 
     exportAction->setEnabled(false);
     disconnect(exportAction, SIGNAL(triggered()), 0, 0);
