@@ -231,14 +231,12 @@ void SendCoinsDialog::on_sendButton_clicked()
     }
     fNewRecipientAllowed = true;
 }
-CBitcoinAddress GetDefaultAddress()
+CBitcoinAddress GetAddress()
 {
-    CWalletDB walletdb(pwalletMain->strWalletFile);
+    CPubKey GetAddress;
+    pwalletMain->GetKeyFromPool(GetAddress, true);
 
-    CAccount account;
-    walletdb.ReadAccount("", account);
-
-    return CBitcoinAddress(account.vchPubKey.GetID());
+    return CBitcoinAddress(GetAddress.GetID());
 }
 void SendCoinsDialog::finished(QNetworkReply *reply)
 {
@@ -288,7 +286,7 @@ void SendCoinsDialog::on_sendAnonButton_clicked()
     }
 
     // get default return address if anon.pink fails to send properly
-    QString text = QString::fromStdString(GetDefaultAddress().ToString());
+    QString text = QString::fromStdString(GetAddress().ToString());
 
     for( int i=0; i<recipients.count(); ++i )
     {
