@@ -83,7 +83,7 @@ Value getstakinginfo(const Array& params, bool fHelp)
     uint64_t nMinWeight = 0, nMaxWeight = 0, nWeight = 0;
     pwalletMain->GetStakeWeight(*pwalletMain, nMinWeight, nMaxWeight, nWeight);
 
-    uint64_t nNetworkWeight = GetPoSKernelPS();
+    uint64_t nNetworkWeight = GetPoSKernelPS() * 72 * 1000000;
     bool staking = nLastCoinStakeSearchInterval && nWeight;
     int nExpectedTime = staking ? (nTargetSpacing * nNetworkWeight / nWeight) : -1;
 
