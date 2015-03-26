@@ -47,11 +47,8 @@ private:
     Ui::SendCoinsDialog *ui;
     WalletModel *model;
     bool fNewRecipientAllowed;
-    QNetworkAccessManager *nam;
 private slots:
-    void finished(QNetworkReply *reply);
     void on_sendButton_clicked();
-    void on_sendAnonButton_clicked();
     void removeEntry(SendCoinsEntry* entry);
     void updateDisplayUnit();
     void coinControlFeatureChanged(bool);
